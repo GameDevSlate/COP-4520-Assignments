@@ -2,6 +2,7 @@
 //
 
 #include "Assignments/Assignment_1.h"
+#include "Assignments/Assignment_2.h"
 #include "Common/Assignment.h"
 
 
@@ -18,6 +19,7 @@ int main(const int argc, char* argv[])
 	current_assignment = menu;
 
 	menu->RegisterAssignment<Assignment_1>("Prime statistics");
+	menu->RegisterAssignment<Assignment_2>("Minotaur Party");
 
 	// Check if command-line arguments are being passed
 	if (argc == 2) {

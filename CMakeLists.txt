@@ -21,6 +21,6 @@ target_include_directories(COP-4520-Assignments PUBLIC src)
 
 target_link_directories(COP-4520-Assignments PRIVATE src)
 
-target_link_libraries(COP-4520-Assignments src Assignment Assignment_1)
+target_link_libraries(COP-4520-Assignments src Common Assignments)
 
 # TODO: Add tests and install targets if needed.

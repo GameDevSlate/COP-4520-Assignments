@@ -1,1 +1,1 @@
-add_library(Assignment INTERFACE Assignment.h)
+add_library(Common INTERFACE Assignment.h)
