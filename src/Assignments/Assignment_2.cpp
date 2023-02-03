@@ -1,6 +1,5 @@
 #include "Assignment_2.h"
 
-#include <algorithm>
 #include <chrono>
 #include <random>
 
@@ -29,7 +28,7 @@ Assignment_2::Assignment_2()
 	// eaten a cupcake before or not
 	m_prisonerCupcakes = std::vector(m_guestCount, false);
 
-	// The leader will always enter first, and so,
+	// The leader will always enter first,
 	// but they do not eat the cupcake
 	m_prisonerCupcakes[0] = true;
 
@@ -45,16 +44,13 @@ Assignment_2::Assignment_2()
 	std::mt19937 minotaur(rd());
 	std::uniform_int_distribution distribution(0, m_guestCount - 1);
 
-	while(true) {
+	while(m_leaderCount < m_guestCount - 1) {
 
 		// Get a random index from the vector
 		auto picked_guest = distribution(minotaur);
 
 		guests[picked_guest] = std::async(std::launch::async, &Assignment_2::EnterLabyrinth, this, picked_guest);
 		guests[picked_guest].wait();
-
-		if (m_leaderCount == m_guestCount - 1)
-			break;
 	}
 
 	auto end_time = std::chrono::high_resolution_clock::now();
@@ -82,6 +78,11 @@ void Assignment_2::EnterLabyrinth(const int thread_num)
 	// they will ask for one, not eat it, and increase their count
 	if (thread_num == 0 && m_cupCake.owns_lock()) {
 		++m_leaderCount;
+
+#ifdef _DEBUG
+		std::cout << "Leader has counted: " << m_leaderCount << '\n';
+#endif
+
 		m_cupCake.unlock();
 		return;
 	}
@@ -92,6 +93,11 @@ void Assignment_2::EnterLabyrinth(const int thread_num)
 	if (thread_num != 0 && !m_cupCake.owns_lock() && !m_prisonerCupcakes[thread_num]) {
 		m_cupCake.lock();
 		m_prisonerCupcakes[thread_num] = true;
+
+#ifdef _DEBUG
+		std::printf("Guest %d has eaten cupcake.\n", thread_num + 1);
+#endif
+
 
 		// Minor check to see if the leader's count has already reached the guest count
 		if (m_leaderCount == m_guestCount - 1)
