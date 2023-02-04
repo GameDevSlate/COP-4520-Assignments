@@ -12,14 +12,16 @@ private:
 
 	void EnterLabyrinth(int thread_num);
 
+	void CheckoutVase(int thread_num);
+
 	int m_guestCount;
 
-	std::mutex m_eatCupcake;
+	std::mutex m_eatCupcake, m_enterRoom;
 
 	std::unique_lock<std::mutex> m_cupCake;
 
 	std::atomic_int m_leaderCount = 1;
 
-	std::vector<bool> m_prisonerCupcakes;
+	std::vector<bool> m_guestsTask;
 
 };
