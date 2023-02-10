@@ -19,7 +19,7 @@ int main(const int argc, char* argv[])
 	current_assignment = menu;
 
 	menu->RegisterAssignment<Assignment_1>("Prime statistics");
-	menu->RegisterAssignment<Assignment_2>("Minotaur Party");
+	menu->RegisterAssignment<Assignment_2>("Minotaur\'s Party");
 
 	// Check if command-line arguments are being passed
 	if (argc == 2) {

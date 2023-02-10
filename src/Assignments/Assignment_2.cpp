@@ -12,10 +12,7 @@ Assignment_2::Assignment_2()
 	// as unlocked to clarify that there is already a cupcake
 	m_cupCake = std::unique_lock(m_eatCupcake, std::defer_lock);
 
-	// Get the maximum number of threads the hardware supports
-	auto thread_max = std::thread::hardware_concurrency();
-
-	std::cout << "How many guests would you like the Minotaur to invite? (Maximum is: " << thread_max << ")\n";
+	std::cout << "How many guests would you like the Minotaur to invite?\n";
 
 	int temp_amount;
 
@@ -23,7 +20,6 @@ Assignment_2::Assignment_2()
 
 	// Simple input validation
 	if (temp_amount < 1) temp_amount = 1;
-	else if (temp_amount > thread_max) temp_amount = thread_max;
 
 	m_guestCount = temp_amount;
 
