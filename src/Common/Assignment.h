@@ -56,7 +56,7 @@ public:
 
 	void AssignmentText(int choice = -1) override
 	{
-		if (choice == -1) {
+		if (choice == -1 || (choice < 0 || static_cast<size_t>(choice) >= m_assignments.size())) {
 			// Cool little menu logo if command-line arguments are not used.
 			std::cout << R"(
     ___              _                                  __      
