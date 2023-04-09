@@ -1,105 +1,70 @@
 #include "Assignment_3.h"
 
 #include <algorithm>
-#include <bitset>
 #include <random>
-
-// Make a Node struct for the guests
-struct Node
-{
-	int guestNumber;
-	std::atomic<std::shared_ptr<Node>> next;
-
-	explicit Node(const int val) : guestNumber(val), next(nullptr){}
-};
-
-// Make a class for an ordered concurrent Linked-list
-class ConcurrentLinkedList
-{
-public:
-	std::atomic<std::shared_ptr<Node>> head;
-
-	ConcurrentLinkedList() : head(nullptr){}
-
-	void Insert(int guest_number)
-	{
-		auto new_node = std::make_shared<Node>(guest_number);
-		auto curr_head = head.load();
-
-		// This loop can safely be while (true) since, all cases
-		// inside will return
-		while (true) {
-
-			// If the head is empty, insert as new head
-			if(!curr_head && head.compare_exchange_strong(curr_head, new_node)) {
-				return;
-			}
-
-			// Insert before head if the new value is smaller than it
-			if (guest_number < curr_head->guestNumber) {
-				new_node->next = curr_head;
-
-				if (head.compare_exchange_strong(curr_head, new_node))
-					return;
-			}
-
-			// Go through list and insert at correct position
-			else {
-
-				auto pre_node = curr_head;
-				auto curr_node = pre_node->next.load();
-
-				// Check that the current node is not null, and that its value
-				// is less than the given guest number
-				while(curr_node && curr_node->guestNumber < guest_number) {
-					pre_node = curr_node;
-					curr_node = pre_node->next.load();
-				}
-
-				new_node->next = curr_node;
-
-				if(pre_node->next.compare_exchange_strong(curr_node, new_node))
-					return;
-			}
-
-			curr_head = head.load();
-		}
-	}
-
-	// Thread-safe removal
-	bool Remove(const int guest_number)
-	{
-		auto curr_head = head.load();
-
-		while(curr_head && curr_head->guestNumber <= guest_number) {
-
-			if (curr_head->guestNumber == guest_number && head.compare_exchange_strong(curr_head, curr_head->next))
-				return true;
-
-			curr_head = curr_head->next.load();
-		}
-
-		return false;
-	}
-};
 
 Assignment_3::Assignment_3()
 {
+	// ***** PART 1 *****
 	// Pre-allocate all 500,000 guests into an array
 	// in random order
-
-	int guests[500000];
+	guests = std::make_unique<std::array<int, 500000>>();
 
 	for (int i = 0; i < 500000; i++)
-		guests[i] = i;
+		guests->at(i) = i;
 
 	std::random_device rd;
 	std::mt19937 gen(rd());
 
 	// Shuffle so that all guests are placed randomly
-	std::shuffle(guests, guests + 500000, gen);
+	std::ranges::shuffle(*guests, gen);
 
-	// Make a bit set that will be checked later
-	std::bitset<500000>guests_thanked;
+	// Create the worker threads
+	std::array<std::future<void>, 4> workers;
 
+	for(int i = 0; i < 4; i++) {
+
+		// Assign the threads their alternating task of adding a guest
+		// and removing it from the list until the guests array has been
+		// completely iterated
+		workers[i] = std::async(std::launch::async, &Assignment_3::AddAndThank, this, i);
+	}
+
+	// To know the total elapsed time, get the current time when the program started.
+	auto start = std::chrono::high_resolution_clock::now();
+
+	for (auto& worker : workers)
+		worker.wait();
+
+	std::cout << "\nAll guests are " << (gifts.Empty() ? "not" : "") << "thanked\n";
+
+	// Now, get the time when we finished the program.
+	auto end = std::chrono::high_resolution_clock::now();
+
+	auto total_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+	std::printf("It took %lldms for the operations to complete.\n", total_time);
+
+	// ***** PART 2 *****
+
+}
+
+void Assignment_3::AddAndThank(const int worker_num)
+{
+	for (int j = worker_num; j < 500000 - worker_num; j += 4) {
+
+#if _DEBUG
+		std::printf("Adding guest %d to the list\n", guests->at(j));
+#endif
+
+		// Add guest to list
+		gifts.Insert(guests->at(j));
+
+		// Send "Thank you" letter (remove) to guest
+		gifts.Remove(guests->at(j));
+
+#if _DEBUG
+		std::printf("Thanked guest %d\n", guests->at(j));
+#endif
+	}
 }

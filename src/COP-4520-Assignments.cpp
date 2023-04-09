@@ -3,6 +3,7 @@
 
 #include "Assignments/Assignment_1.h"
 #include "Assignments/Assignment_2.h"
+#include "Assignments/Assignment_3.h"
 #include "Common/Assignment.h"
 
 
@@ -16,8 +17,7 @@ int main(const int argc, char* argv[])
 
 	menu->RegisterAssignment<Assignment_1>("Prime statistics");
 	menu->RegisterAssignment<Assignment_2>("Minotaur\'s Party");
-
-	//auto assignments_length =
+	menu->RegisterAssignment<Assignment_3>("Minotaur Post Party and Sensors Statistics");
 
 	// Check if command-line arguments are being passed
 	const int command = argc == 2 ? std::strtol(argv[1], nullptr, 10) : -1;
