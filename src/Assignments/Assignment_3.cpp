@@ -1,5 +1,6 @@
 #include "Assignment_3.h"
 
+#include <ctime>
 #include <iostream>
 #include <random>
 #include <ranges>
@@ -10,7 +11,7 @@ Assignment_3::Assignment_3()
 	// ***** PART 1 *****
 	// Pre-allocate all 500,000 guests into an array
 	// in random order
-	
+	/*
 	guests = std::make_unique<std::array<int, 500000>>();
 
 	for (int i = 0; i < 500000; i++)
@@ -49,7 +50,7 @@ Assignment_3::Assignment_3()
 	auto total_time = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
 
 	std::printf("It took %lldms for the operations to complete.\n\n", total_time);
-	
+	*/
 
 	// ***** PART 2 *****
 
@@ -131,9 +132,15 @@ void Assignment_3::PrintReport()
 	for (auto sensor : sensors_data | std::views::values)
 		all_temps.insert(all_temps.end(), sensor.begin(), sensor.end());
 
+	// Make a copy of all temperatures to be used for later.
+	auto all_temps_copy = all_temps;
+
 	// Get the top 5 highest and lowest temps
 	std::ranges::sort(all_temps,
-		[](const std::pair<std::chrono::steady_clock::time_point, int>& data1, decltype(data1) data2) { return data1.second < data2.second; });
+		[](const std::pair<std::chrono::steady_clock::time_point, int>& data1, decltype(data1) data2)
+		{
+			return data1.second < data2.second;
+		});
 
 	std::cout << "The top highest temperatures recorded were: ";
 
@@ -144,4 +151,34 @@ void Assignment_3::PrintReport()
 
 	for (int i = 0; i < 5; i++)
 		std::printf("%d%s", all_temps[i].second, i < 4 ? ", " : "\n");
+
+	// Getting the biggest temp difference in 10 min. interval
+	std::vector < std::pair < std::chrono::steady_clock::time_point, int> > mins, maxes;
+
+	std::chrono::steady_clock::time_point start_time;
+	int biggest_diff = 0;
+
+	// Take all the min and max values from each sensor
+	for (int i = 0; i < all_temps_copy.size(); i += 10) {
+		mins.push_back(*std::min_element(all_temps_copy.begin() + i, all_temps_copy.begin() + i + 10,
+						[](const std::pair<std::chrono::steady_clock::time_point, int>& p1,
+							const std::pair<std::chrono::steady_clock::time_point, int>& p2) {
+								return p1.second < p2.second;
+						}));
+
+		maxes.push_back(*std::max_element(all_temps_copy.begin() + i, all_temps_copy.begin() + i + 10,
+						[](const std::pair<std::chrono::steady_clock::time_point, int>& p1,
+							const std::pair<std::chrono::steady_clock::time_point, int>& p2) {
+								return p1.second < p2.second;
+						}));
+
+		int diff_indx = i / 10;
+
+		if (int diff = maxes[diff_indx].second - mins[diff_indx].second; diff > biggest_diff) 
+			biggest_diff = diff;
+
+	}
+
+	std::cout << "The largest temperature difference in a 10-minute interval was " <<  biggest_diff << "F.\n";
+
 }
