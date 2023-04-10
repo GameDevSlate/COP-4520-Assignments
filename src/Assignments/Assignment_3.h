@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include <bitset>
+#include <map>
 
 #include "../Common/Assignment.h"
 
@@ -87,16 +87,20 @@ private:
 
 	void AddAndThank(int worker_num);
 
+	void ReadTemperature(int sensor_id);
+
+	void PrintReport();
+
 	// Part 1
 	std::unique_ptr<std::array<int, 500000>> guests;
 
 	ConcurrentLinkedList gifts;
 
-	// Condition variable that tells all the workers to remove
-	// a gift from the list when the last worker has inserted
-	std::condition_variable ready_to_thank;
+	// Part 2
 
-	// Condition variable that tells all the workers to insert
-	// again
-	std::condition_variable ready_to_insert;
+	const int reading_amount = 60;
+	bool stop_reading = false;
+
+	// A map that will keep track of each sensors readings are their time points
+	std::map<int, std::vector<std::pair<std::chrono::steady_clock::time_point, int>>> sensors_data;
 };
